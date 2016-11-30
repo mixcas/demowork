@@ -1,0 +1,26 @@
+<div class="psl-weather">
+
+        <div ng-repeat="weatherObj in weatherCtrl.weatherObjs">
+            <div class="col-md-3">
+                <h3 id="current-city" style="margin-top: 10px;">{{weatherObj.cityState}}</h3>
+                <h4 id="current-forecast">PARTLY CLOUDY</h4>
+                <img ng-src="{{weatherObj.weatherIcon}}" />
+            </div>
+
+            <div class="col-md-3">
+                <h4 id="city-precipitation">PRECIPITATION: 45%</h4>
+                <h4 id="city-humidity">HUMIDITY: 10%</h4>
+                <h4 id="city-wind">WIND: 45 MPH</h4>
+            </div>
+        </div>
+
+
+
+        <div class="col-md-3">
+            <h4 id="add-city">ADD CITY</h4>
+            <input id="search-new-city" ng-model="weatherCity.newCity" type="text" />
+            <button ng-click="addCity(weatherCity.newCity)">ADD</button>
+        </div>
+
+
+</div>

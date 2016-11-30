@@ -1,0 +1,16 @@
+<div class="psl-calculator">
+    <div class="psl-header">
+        <input class="psl-calcinput" ng-model="calcCtrl.calcInput" />
+    </div>
+    <div class="psl-keypad">
+        <div class="psl-clearbtnspace">
+            <button ng-click="calcCtrl.clearClick()" class="psl-clearbtn">C</button>
+        </div>
+
+        <div class="psl-opsspace">
+            <div class="col-md-offset-1 psl-row" ng-repeat="row in calcCtrl.rows">
+                <button class="psl-opbtn" ng-repeat="op in row.ops" ng-click="calcCtrl.opClick(op)" ng-bind="op"></button>
+            </div>
+        </div>
+    </div>
+</div>
