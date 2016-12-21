@@ -17,31 +17,44 @@ angular.module( 'ngBoilerplate.weather', [
   });
 })
 
-.factory('weatherService', function($http){
+.factory('weatherService', function($http, $q){
+
+  var weatherObj = {
+    //currentForecast: '',
+
+  }
 
   return {
 
     getWeather: function(lat,long){
 
-      $http.get("http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" +
-          long + "&APPID=60f3ccf4f2627d5542ff29c39ad87d13").then(function(data){
+      var deferred = $q.defer();
 
-      return(data.data);
+      $http.get("http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" +
+          long + "&APPID=60f3ccf4f2627d5542ff29c39ad87d13").then(function(results){
+
+            weatherObj.currentForecast = results.data;
+            weatherObj.weatherIcon = results.data;
+            weatherObj.precipitation = results.data;
+            weatherObj.humidity = results.data;
+            weatherObj.wind = results.data;
+            deferred.resolve(weatherObj);
+            return deferred.promise;
 
       });
 
     },
     setWeather: function(data){
-        vm.weatherObjs[0].push({
-          weatherData: data
-        });
+        // vm.weatherObjs[0].push({
+        //   weatherData: data
+        // });
     }
 
   }
 
 })
 
-.controller( 'WeatherCtrl', function AboutCtrl( $scope ) {
+.controller( 'WeatherCtrl', function WeatherCtrl( $scope ) {
 
 })
 
@@ -91,7 +104,11 @@ angular.module( 'ngBoilerplate.weather', [
               }
             });
 
-            var weatherData = weatherService.getWeather(lat,long);
+            weatherService.getWeather(lat,long).then(function(result){
+
+              console.log(result);
+
+            });
             var setWeatherData = weatherService.setWeather(weatherData);
 
             // weatherCtrl.weatherObjs[0].push({
