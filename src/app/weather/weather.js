@@ -1,135 +1,162 @@
-angular.module( 'ngBoilerplate.weather', [
-  'ui.router',
-  'placeholders',
-  'ui.bootstrap',
-  'geolocation'
+angular.module('ngBoilerplate.weather', [
+    'ui.router',
+    'placeholders',
+    'ui.bootstrap',
+    'geolocation'
 ])
 
-.config(function config( $stateProvider ) {
-  $stateProvider.state( 'weather', {
-    url: '/weather',
-    views: {
-      "main": {
-        controller: 'WeatherCtrl',
-        templateUrl: 'weather/weather.tpl.html'
-      }
-    }
-  });
-})
+    .config(function config($stateProvider) {
+        $stateProvider.state('weather', {
+            url: '/weather',
+            views: {
+                "main": {
+                    controller: 'WeatherCtrl',
+                    templateUrl: 'weather/weather.tpl.html'
+                }
+            }
+        });
+    })
 
-.factory('weatherService', function($http, $q){
+    .factory('weatherService', function ($http, $q, $log) {
 
-  var weatherObj = {
-    //currentForecast: '',
+        return {
 
-  }
+            getWeather: function (lat, lng) {
 
-  return {
+                var deferred = $q.defer();
 
-    getWeather: function(lat,long){
+                $http.get("http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" +
+                    lng + "&APPID=60f3ccf4f2627d5542ff29c39ad87d13").then(function (results) {
 
-      var deferred = $q.defer();
+                    deferred.resolve({
 
-      $http.get("http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" +
-          long + "&APPID=60f3ccf4f2627d5542ff29c39ad87d13").then(function(results){
+                        currentForecast: results.data.weather[0].description,
+                        weatherIcon: results.data.weather[0].icon,
+                        temperature: results.data.main.temp,
+                        humidity: results.data.main.humidity,
+                        wind: results.data.wind.speed
 
-            weatherObj.currentForecast = results.data;
-            weatherObj.weatherIcon = results.data;
-            weatherObj.precipitation = results.data;
-            weatherObj.humidity = results.data;
-            weatherObj.wind = results.data;
-            deferred.resolve(weatherObj);
-            return deferred.promise;
+                    });
+                    // }).error(function(msg, code) {
+                    //     deferred.reject(msg);
+                    //     $log.error(msg, code);
+                });
 
-      });
+                return deferred.promise;
 
-    },
-    setWeather: function(data){
-        // vm.weatherObjs[0].push({
-        //   weatherData: data
-        // });
-    }
+            }
+        };
 
-  }
+    })
 
-})
+    .controller('WeatherCtrl', function WeatherCtrl($scope) {
 
-.controller( 'WeatherCtrl', function WeatherCtrl( $scope ) {
-
-})
+    })
 
     .directive('pslWeather', ['geolocation', 'weatherService', function (geolocation, weatherService) {
-      return {
-        restrict: 'E',
-        templateUrl: 'weather/pslWeather.tpl.html',
-        controller: function () {
+        return {
+            restrict: 'E',
+            templateUrl: 'weather/pslWeather.tpl.html',
+            controller: function () {
 
-          var vm = this;
+                var vm = this;
 
-          vm.getLoc = '';
-          vm.geocoder = new google.maps.Geocoder();
-          vm.cityState = '';
-          vm.weatherObjs= [];
-          vm.weatherIcon = '';
-          //vm.lat
+                vm.getLoc = '';
+                vm.geocoder = new google.maps.Geocoder();
+                vm.weatherObjs = [];
+                vm.weatherIcon = '';
+
+            },
+            controllerAs: 'weatherCtrl',
+            link: function (scope, element, attrs, weatherCtrl) {
+
+                var lat, lng;
+
+                weatherCtrl.getLoc = geolocation.getLocation().then(function (data) {
+                    lat = data.coords.latitude;
+                    lng = data.coords.longitude;
+
+                    var latlng = new google.maps.LatLng(lat, lng);
+
+                    weatherCtrl.geocoder.geocode({
+                        'latLng': latlng
+                    }, function (results, status) {
+                        if (status == google.maps.GeocoderStatus.OK) {
+                            if (results[0]) {
+
+                                weatherService.getWeather(lat, lng).then(function (result) {
+
+                                    weatherCtrl.weatherObjs.push({
+                                        cityState: results[2]['address_components'][0].long_name + ', ' +
+                                        results[2]['address_components'][2].short_name,
+                                        currentForecast: toTitleCase(result.currentForecast),
+                                        weatherIcon: "http://openweathermap.org/img/w/" + result.weatherIcon + ".png",
+                                        temperature: (Math.round(result.temperature - 273)).toString() + " °C",
+                                        humidity: "Humidity: " + result.humidity.toString() + "%",
+                                        wind: "Wind: " + result.wind.toString() + " m/s",
+                                        cityFlag: "http://openweathermap.org/images/flags/" +
+                                        results[2]['address_components'][2].short_name.toLocaleLowerCase() + ".png"
+                                    });
+                                });
+
+                            } else {
+                                alert("city not found");
+                            }
+                        } else {
+                            alert("Geocoder failed due to: " + status);
+                        }
+                    });
+
+                });
+
+                scope.addCity = function () {
+
+                    var newLat = document.getElementById('cityLat').value;
+                    var newLng = document.getElementById('cityLng').value;
+                    var newCity = document.getElementById('city2').value;
+                    var newCountry = document.getElementById('country2').value;
+
+                    weatherService.getWeather(newLat, newLng).then(function (result) {
+
+                        weatherCtrl.weatherObjs.push({
+                            cityState: newCity + ', ' + newCountry,
+                            currentForecast: toTitleCase(result.currentForecast),
+                            weatherIcon: "http://openweathermap.org/img/w/" + result.weatherIcon + ".png",
+                            temperature: (Math.round(result.temperature - 273)).toString() + " °C",
+                            humidity: "Humidity: " + result.humidity.toString() + "%",
+                            wind: "Wind: " + result.wind.toString() + " m/s",
+                            cityFlag: "http://openweathermap.org/images/flags/" + newCountry.toLocaleLowerCase() + ".png"
+                        });
+                    });
+
+                };
 
 
-        },
-        controllerAs: 'weatherCtrl',
-        link: function (scope, element, attrs, weatherCtrl) {
+                function initialize() {
 
-          var lat,long;
+                    var input = document.getElementById('search-new-city');
+                    var autocomplete = new google.maps.places.Autocomplete(input);
+                    google.maps.event.addListener(autocomplete, 'place_changed', function () {
+                        var place = autocomplete.getPlace();
+                        document.getElementById('city2').value = place.name;
+                        document.getElementById('country2').value = place.address_components[place.address_components.length-1].short_name;
+                        document.getElementById('cityLat').value = place.geometry.location.lat();
+                        document.getElementById('cityLng').value = place.geometry.location.lng();
 
-          weatherCtrl.getLoc = geolocation.getLocation().then(function(data){
-            lat = data.coords.latitude;
-            long = data.coords.longitude;
-
-            var latlng = new google.maps.LatLng(lat, long);
-
-            weatherCtrl.geocoder.geocode({
-              'latLng': latlng
-            }, function(results, status) {
-              if (status == google.maps.GeocoderStatus.OK) {
-                if (results[0]) {
-                  weatherCtrl.weatherObjs.push({
-                     cityState:  results[0]['address_components'][2].long_name + ', ' +
-                     results[0]['address_components'][4].short_name
-                  });
-
-                } else {
-                  alert("city not found");
+                    });
                 }
-              } else {
-                alert("Geocoder failed due to: " + status);
-              }
-            });
 
-            weatherService.getWeather(lat,long).then(function(result){
+                function toTitleCase(str) {
 
-              console.log(result);
+                    return str.replace(/\w\S*/g, function(txt){
+                        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();}
+                    );
 
-            });
-            var setWeatherData = weatherService.setWeather(weatherData);
+                }
 
-            // weatherCtrl.weatherObjs[0].push({
-            //     weatherIcon: "http://openweathermap.org/img/w/" + weatherCtrl.weatherObjs[0].weather.icon + ".png"
-            // });
+                google.maps.event.addDomListener(window, 'load', initialize);
 
 
-          });
-
-            function initialize() {
-
-                var input = document.getElementById('search-new-city');
-                var autocomplete = new google.maps.places.Autocomplete(input);
             }
-
-            google.maps.event.addDomListener(window, 'load', initialize);
-
-
-
-
-
-        }
-      };
+        };
     }]);

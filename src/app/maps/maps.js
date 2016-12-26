@@ -85,7 +85,7 @@ angular.module( 'ngBoilerplate.maps', [
 
             }
 
-          }
+          };
 
           function handleLocationError() {
             alert('Cannot find location');
@@ -94,7 +94,7 @@ angular.module( 'ngBoilerplate.maps', [
           function placeMarkerAndPanTo(latLng, map) {
             var marker = new google.maps.Marker({
               position: latLng,
-              map: map,
+              map: map
 
             });
 

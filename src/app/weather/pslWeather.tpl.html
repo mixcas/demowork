@@ -1,26 +1,29 @@
 <div class="psl-weather">
 
-        <div ng-repeat="weatherObj in weatherCtrl.weatherObjs">
-            <div class="col-md-3">
-                <h3 id="current-city" style="margin-top: 10px;">{{weatherObj.cityState}}</h3>
-                <h4 id="current-forecast">{{weatherObj.currentForecast}}</h4>
-                <img ng-src="{{weatherObj.weatherIcon}}" />
-            </div>
-
-            <div class="col-md-3">
-                <h4 id="city-precipitation">{{weatherObj.precipitation}}</h4>
-                <h4 id="city-humidity">{{weatherObj.humidity}}</h4>
-                <h4 id="city-wind">{{weatherObj.wind}}</h4>
-            </div>
+    <div class="row" ng-repeat="weatherObj in weatherCtrl.weatherObjs">
+        <div class="col-md-3">
+            <h3 class="current-city">{{weatherObj.cityState}}</h3>
+            <img class="city-flag" ng-src="{{weatherObj.cityFlag}}" />
+            <h4 class="current-forecast">{{weatherObj.currentForecast}}</h4>
+            <img class="weather-icon" ng-src="{{weatherObj.weatherIcon}}"/>
         </div>
-
-
 
         <div class="col-md-3">
-            <h4 id="add-city">ADD CITY</h4>
-            <input id="search-new-city" ng-model="weatherCity.newCity" type="text" />
-            <button ng-click="addCity(weatherCity.newCity)">ADD</button>
+            <h3 class="city-temperature">{{weatherObj.temperature}}</h3>
+            <h4 class="city-humidity">{{weatherObj.humidity}}</h4>
+            <h4 class="city-wind">{{weatherObj.wind}}</h4>
         </div>
+    </div>
 
+
+    <div class="col-md-3" id="add-city">
+        <h4>ADD CITY</h4>
+        <input id="search-new-city" type="text"/>
+        <input type="hidden" id="city2" name="city2"/>
+        <input type="hidden" id="country2" name="country2"/>
+        <input type="hidden" id="cityLat" name="cityLat"/>
+        <input type="hidden" id="cityLng" name="cityLng"/>
+        <button ng-click="addCity()">ADD</button>
+    </div>
 
 </div>
