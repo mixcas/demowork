@@ -64,13 +64,12 @@ angular.module('ngBoilerplate.weather', [
                 vm.getLoc = '';
                 vm.geocoder = new google.maps.Geocoder();
                 vm.weatherObjs = [];
-                vm.weatherIcon = '';
 
             },
             controllerAs: 'weatherCtrl',
             link: function (scope, element, attrs, weatherCtrl) {
 
-                var lat, lng;
+                var lat, lng, city, country;
 
                 weatherCtrl.getLoc = geolocation.getLocation().then(function (data) {
                     lat = data.coords.latitude;
@@ -86,16 +85,22 @@ angular.module('ngBoilerplate.weather', [
 
                                 weatherService.getWeather(lat, lng).then(function (result) {
 
+                                    city = results[2]['address_components'][0].long_name;
+
+                                    if (isNaN(results[2]['address_components'][results[2]['address_components'].length-1].short_name)) {
+                                        country = results[2]['address_components'][results[2]['address_components'].length-1].short_name;
+                                    } else {
+                                        country = results[2]['address_components'][results[2]['address_components'].length-2].short_name;
+                                    }
+
                                     weatherCtrl.weatherObjs.push({
-                                        cityState: results[2]['address_components'][0].long_name + ', ' +
-                                        results[2]['address_components'][2].short_name,
+                                        cityState: city + ', ' + country,
                                         currentForecast: toTitleCase(result.currentForecast),
                                         weatherIcon: "http://openweathermap.org/img/w/" + result.weatherIcon + ".png",
                                         temperature: (Math.round(result.temperature - 273)).toString() + " °C",
                                         humidity: "Humidity: " + result.humidity.toString() + "%",
                                         wind: "Wind: " + result.wind.toString() + " m/s",
-                                        cityFlag: "http://openweathermap.org/images/flags/" +
-                                        results[2]['address_components'][2].short_name.toLocaleLowerCase() + ".png"
+                                        cityFlag: "http://openweathermap.org/images/flags/" + country.toLocaleLowerCase() + ".png"
                                     });
                                 });
 
@@ -139,9 +144,19 @@ angular.module('ngBoilerplate.weather', [
                     google.maps.event.addListener(autocomplete, 'place_changed', function () {
                         var place = autocomplete.getPlace();
                         document.getElementById('city2').value = place.name;
-                        document.getElementById('country2').value = place.address_components[place.address_components.length-1].short_name;
                         document.getElementById('cityLat').value = place.geometry.location.lat();
                         document.getElementById('cityLng').value = place.geometry.location.lng();
+
+                        if (isNaN(place.address_components[place.address_components.length-1].short_name)) {
+
+                            document.getElementById('country2').value = place.address_components[place.address_components.length-1].short_name;
+
+                        } else {
+
+                            document.getElementById('country2').value = place.address_components[place.address_components.length-2].short_name;
+
+                        }
+
 
                     });
                 }
