@@ -1,22 +1,47 @@
 <div class="psl-weather">
 
     <div class="row" ng-repeat="weatherObj in weatherCtrl.weatherObjs">
-        <div class="col-md-3">
+        <div class="col-md-2">
             <h3 class="current-city">{{weatherObj.cityState}}</h3>
             <img class="city-flag" ng-src="{{weatherObj.cityFlag}}" />
             <h4 class="current-forecast">{{weatherObj.currentForecast}}</h4>
             <img class="weather-icon" ng-src="{{weatherObj.weatherIcon}}"/>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-2">
             <h3 class="city-temperature">{{weatherObj.temperature}}</h3>
             <h4 class="city-humidity">{{weatherObj.humidity}}</h4>
             <h4 class="city-wind">{{weatherObj.wind}}</h4>
         </div>
+
+        <div class="col-md-6" id="daily-forecast">
+            <table>
+                <tr>
+                    <th class="weather-cell">{{weatherObj.dayOneForecast.day}}</th>
+                    <th class="weather-cell">{{weatherObj.dayTwoForecast.day}}</th>
+                    <th class="weather-cell">{{weatherObj.dayThreeForecast.day}}</th>
+                </tr>
+                <tr>
+                    <th class="weather-cell">{{weatherObj.dayOneForecast.currentForecast}}</th>
+                    <th class="weather-cell">{{weatherObj.dayTwoForecast.currentForecast}}</th>
+                    <th class="weather-cell">{{weatherObj.dayThreeForecast.currentForecast}}</th>
+                </tr>
+                <tr>
+                    <th class="weather-cell"><img class="weather-icon" ng-src="{{weatherObj.dayOneForecast.weatherIcon}}" /></th>
+                    <th class="weather-cell"><img class="weather-icon" ng-src="{{weatherObj.dayTwoForecast.weatherIcon}}" /></th>
+                    <th class="weather-cell"><img class="weather-icon" ng-src="{{weatherObj.dayThreeForecast.weatherIcon}}" /></th>
+                </tr>
+                <tr>
+                    <th class="weather-cell">{{weatherObj.dayOneForecast.temperature}}</th>
+                    <th class="weather-cell">{{weatherObj.dayTwoForecast.temperature}}</th>
+                    <th class="weather-cell">{{weatherObj.dayThreeForecast.temperature}}</th>
+                </tr>
+            </table>
+        </div>
     </div>
 
 
-    <div class="col-md-3" id="add-city">
+    <div class="col-md-2" id="add-city">
         <h4>ADD CITY</h4>
         <input id="search-new-city" type="text"/>
         <input type="hidden" id="city2" name="city2"/>

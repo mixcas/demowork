@@ -25,16 +25,35 @@ angular.module('ngBoilerplate.weather', [
 
                 var deferred = $q.defer();
 
-                $http.get("http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" +
-                    lng + "&APPID=60f3ccf4f2627d5542ff29c39ad87d13").then(function (results) {
+                $http.get("http://api.openweathermap.org/data/2.5/forecast/daily?lat=" + lat + "&lon=" +
+                    lng + "&units=metric&APPID=60f3ccf4f2627d5542ff29c39ad87d13").then(function (results) {
 
                     deferred.resolve({
 
-                        currentForecast: results.data.weather[0].description,
-                        weatherIcon: results.data.weather[0].icon,
-                        temperature: results.data.main.temp,
-                        humidity: results.data.main.humidity,
-                        wind: results.data.wind.speed
+                        country: results.data.city.country,
+                        currentForecast: results.data.list[0].weather[0].description,
+                        weatherIcon: results.data.list[0].weather[0].icon,
+                        temperature: results.data.list[0].temp.day,
+                        humidity: results.data.list[0].humidity,
+                        wind: results.data.list[0].speed,
+                        dayOneForecast: {
+                            day: results.data.list[1].dt,
+                            currentForecast: results.data.list[1].weather[0].description,
+                            weatherIcon: results.data.list[1].weather[0].icon,
+                            temperature: results.data.list[1].temp.day
+                        },
+                        dayTwoForecast: {
+                            day: results.data.list[2].dt,
+                            currentForecast: results.data.list[2].weather[0].description,
+                            weatherIcon: results.data.list[2].weather[0].icon,
+                            temperature: results.data.list[2].temp.day
+                        },
+                        dayThreeForecast: {
+                            day: results.data.list[3].dt,
+                            currentForecast: results.data.list[3].weather[0].description,
+                            weatherIcon: results.data.list[3].weather[0].icon,
+                            temperature: results.data.list[3].temp.day
+                        }
 
                     });
                     // }).error(function(msg, code) {
@@ -86,21 +105,39 @@ angular.module('ngBoilerplate.weather', [
                                 weatherService.getWeather(lat, lng).then(function (result) {
 
                                     city = results[2]['address_components'][0].long_name;
+                                    country = result.country;
 
-                                    if (isNaN(results[2]['address_components'][results[2]['address_components'].length-1].short_name)) {
-                                        country = results[2]['address_components'][results[2]['address_components'].length-1].short_name;
-                                    } else {
-                                        country = results[2]['address_components'][results[2]['address_components'].length-2].short_name;
-                                    }
 
                                     weatherCtrl.weatherObjs.push({
                                         cityState: city + ', ' + country,
                                         currentForecast: toTitleCase(result.currentForecast),
                                         weatherIcon: "http://openweathermap.org/img/w/" + result.weatherIcon + ".png",
-                                        temperature: (Math.round(result.temperature - 273)).toString() + " °C",
+                                        temperature: result.temperature.toString() + " °C",
                                         humidity: "Humidity: " + result.humidity.toString() + "%",
                                         wind: "Wind: " + result.wind.toString() + " m/s",
-                                        cityFlag: "http://openweathermap.org/images/flags/" + country.toLocaleLowerCase() + ".png"
+                                        cityFlag: "http://openweathermap.org/images/flags/" + country.toLocaleLowerCase() + ".png",
+                                        dayOneForecast: {
+                                            day: timeConverter(result.dayOneForecast.day),
+                                            currentForecast: toTitleCase(result.dayOneForecast.currentForecast),
+                                            weatherIcon: "http://openweathermap.org/img/w/" +
+                                                         result.dayOneForecast.weatherIcon + ".png",
+                                            temperature: result.dayOneForecast.temperature.toString() + " °C"
+                                        },
+                                        dayTwoForecast: {
+                                            day: timeConverter(result.dayTwoForecast.day),
+                                            currentForecast: toTitleCase(result.dayTwoForecast.currentForecast),
+                                            weatherIcon: "http://openweathermap.org/img/w/" +
+                                                          result.dayTwoForecast.weatherIcon + ".png",
+                                            temperature: result.dayTwoForecast.temperature.toString() + " °C"
+                                        },
+                                        dayThreeForecast: {
+                                            day: timeConverter(result.dayThreeForecast.day),
+                                            currentForecast: toTitleCase(result.dayThreeForecast.currentForecast),
+                                            weatherIcon: "http://openweathermap.org/img/w/" +
+                                                         result.dayThreeForecast.weatherIcon + ".png",
+                                            temperature: result.dayThreeForecast.temperature.toString() + " °C"
+                                        }
+
                                     });
                                 });
 
@@ -127,10 +164,31 @@ angular.module('ngBoilerplate.weather', [
                             cityState: newCity + ', ' + newCountry,
                             currentForecast: toTitleCase(result.currentForecast),
                             weatherIcon: "http://openweathermap.org/img/w/" + result.weatherIcon + ".png",
-                            temperature: (Math.round(result.temperature - 273)).toString() + " °C",
+                            temperature: result.temperature.toString() + " °C",
                             humidity: "Humidity: " + result.humidity.toString() + "%",
                             wind: "Wind: " + result.wind.toString() + " m/s",
-                            cityFlag: "http://openweathermap.org/images/flags/" + newCountry.toLocaleLowerCase() + ".png"
+                            cityFlag: "http://openweathermap.org/images/flags/" + newCountry.toLocaleLowerCase() + ".png",
+                            dayOneForecast: {
+                                day: timeConverter(result.dayOneForecast.day),
+                                currentForecast: toTitleCase(result.dayOneForecast.currentForecast),
+                                weatherIcon: "http://openweathermap.org/img/w/" +
+                                result.dayOneForecast.weatherIcon + ".png",
+                                temperature: result.dayOneForecast.temperature.toString() + " °C"
+                            },
+                            dayTwoForecast: {
+                                day: timeConverter(result.dayTwoForecast.day),
+                                currentForecast: toTitleCase(result.dayTwoForecast.currentForecast),
+                                weatherIcon: "http://openweathermap.org/img/w/" +
+                                result.dayTwoForecast.weatherIcon + ".png",
+                                temperature: result.dayTwoForecast.temperature.toString() + " °C"
+                            },
+                            dayThreeForecast: {
+                                day: timeConverter(result.dayThreeForecast.day),
+                                currentForecast: toTitleCase(result.dayThreeForecast.currentForecast),
+                                weatherIcon: "http://openweathermap.org/img/w/" +
+                                result.dayThreeForecast.weatherIcon + ".png",
+                                temperature: result.dayThreeForecast.temperature.toString() + " °C"
+                            }
                         });
                     });
 
@@ -147,13 +205,13 @@ angular.module('ngBoilerplate.weather', [
                         document.getElementById('cityLat').value = place.geometry.location.lat();
                         document.getElementById('cityLng').value = place.geometry.location.lng();
 
-                        if (isNaN(place.address_components[place.address_components.length-1].short_name)) {
+                        if (isNaN(place.address_components[place.address_components.length - 1].short_name)) {
 
-                            document.getElementById('country2').value = place.address_components[place.address_components.length-1].short_name;
+                            document.getElementById('country2').value = place.address_components[place.address_components.length - 1].short_name;
 
                         } else {
 
-                            document.getElementById('country2').value = place.address_components[place.address_components.length-2].short_name;
+                            document.getElementById('country2').value = place.address_components[place.address_components.length - 2].short_name;
 
                         }
 
@@ -163,10 +221,21 @@ angular.module('ngBoilerplate.weather', [
 
                 function toTitleCase(str) {
 
-                    return str.replace(/\w\S*/g, function(txt){
-                        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();}
+                    return str.replace(/\w\S*/g, function (txt) {
+                            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+                        }
                     );
 
+                }
+
+                function timeConverter(UNIX_timestamp){
+                    var a = new Date(UNIX_timestamp * 1000);
+                    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    var year = a.getFullYear();
+                    var month = months[a.getMonth()];
+                    var date = a.getDate();
+                    var time = date + ' ' + month + ' ' + year ;
+                    return time;
                 }
 
                 google.maps.event.addDomListener(window, 'load', initialize);
