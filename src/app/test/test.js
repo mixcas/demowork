@@ -43,6 +43,13 @@ angular.module('ngBoilerplate.maps', [
                     $http.post("http://localhost:3000/markers", { latLng: latLng, markerNum: clicks, addOrDel: addOrDel });
 
                 }
+                // getNumClicks: function() {
+                //
+                //     $http.get("http://localhost:3000/clicks").then(function (results) {
+                //
+                //     };
+                //
+                // }
             };
 
         })
@@ -179,85 +186,79 @@ angular.module('ngBoilerplate.maps', [
     .controller('modalCtrl', function modalCtrl($scope, $modal, $modalInstance) {
 
         $scope.s3Url = "https://s3-us-west-1.amazonaws.com/pasalo92imageupload/";
-        // var deferred = $q.defer();
-        var picObjects = [];
 
         var bucket = new AWS.S3({
             params: {
                 Bucket: 'pasalo92imageupload'
             }
         });
-
         bucket.listObjects(function (err, data) {
             if (err) {
                 console.log(err);
             } else {
                 //console.log(data);
-                $scope.thumbData = data.Contents;
-                picObjects = data.Contents;
+                $scope.imageData = data.Contents;
             }
         });
 
-
-
-        $scope.open = function(indx){
+        $scope.open=function(indx){
             
-            $scope.modalInstance = $modal.open({
+            $scope.imageData[indx].active=true;
+
+            $scope.modalInstance=$modal.open({
                 animation: true,
-                templateUrl: 'pic-modal.html',
-                controller: function ($scope) {
-                    $scope.imageData = picObjects;
-                    $scope.s3Url2 = "https://s3-us-west-1.amazonaws.com/pasalo92imageupload/";
-                    $scope.imageData[indx].active = true;
-                }
+                templateUrl: 'pic-modal.html'
+                //scope: $scope
             });
         };
 
         $scope.ok = function () {
             $modalInstance.close();
         };
-
-        var uniqueString = function() {
-            var text     = "";
-            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-            for( var i=0; i < 8; i++ ) {
-                text += possible.charAt(Math.floor(Math.random() * possible.length));
-            }
-            return text;
-        };
         
-        $scope.upload = function (file) {
-
-            if(file) {
-                // Perform File Size Check First
-                // var fileSize = Math.round(parseInt($scope.file.size));
-                // if (fileSize > $scope.sizeLimit) {
-                //     toastr.error('Sorry, your attachment is too big. <br/> Maximum '  + $scope.fileSizeLabel() + ' file attachment allowed','File Too Large');
-                //     return false;
-                // }
-                // Prepend Unique String To Prevent Overwrites
-                var uniqueFileName = uniqueString() + '-' + file.name;
-
-                var params = { Key: uniqueFileName, ContentType: file.type, Body: file, ServerSideEncryption: 'AES256' };
-
-                bucket.putObject(params, function(err) {
-                    if(err) {
-                        console.log(err.message);
-                        return false;
-                    }
-                    else {
-                        // Upload Successfully Finished
-                        alert('File Uploaded Successfully');
-
-                    }
-                });
-            }
-            else {
-                // No File Selected
-                alert('Please select a file to upload');
-            }
-
-        };
+        // $scope.upload = function () {
+        //
+        //     /*
+        //
+        //     if($scope.file) {
+        //         // Perform File Size Check First
+        //         // var fileSize = Math.round(parseInt($scope.file.size));
+        //         // if (fileSize > $scope.sizeLimit) {
+        //         //     toastr.error('Sorry, your attachment is too big. <br/> Maximum '  + $scope.fileSizeLabel() + ' file attachment allowed','File Too Large');
+        //         //     return false;
+        //         // }
+        //         // Prepend Unique String To Prevent Overwrites
+        //         var uniqueFileName = $scope.uniqueString() + '-' + $scope.file.name;
+        //
+        //         var params = { Key: uniqueFileName, ContentType: $scope.file.type, Body: $scope.file, ServerSideEncryption: 'AES256' };
+        //
+        //         bucket.putObject(params, function(err, data) {
+        //             if(err) {
+        //                 toastr.error(err.message,err.code);
+        //                 return false;
+        //             }
+        //             else {
+        //                 // Upload Successfully Finished
+        //                 toastr.success('File Uploaded Successfully', 'Done');
+        //
+        //                 // Reset The Progress Bar
+        //                 setTimeout(function() {
+        //                     $scope.uploadProgress = 0;
+        //                     $scope.$digest();
+        //                 }, 4000);
+        //             }
+        //         })
+        //             .on('httpUploadProgress',function(progress) {
+        //                 $scope.uploadProgress = Math.round(progress.loaded / progress.total * 100);
+        //                 $scope.$digest();
+        //             });
+        //     }
+        //     else {
+        //         // No File Selected
+        //         toastr.error('Please select a file to upload');
+        //     }
+        //
+        //     */
+        // };
 
     });
