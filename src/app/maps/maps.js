@@ -75,8 +75,8 @@ angular.module('ngBoilerplate.maps', [
                 initMap = function () {
 
                     AWS.config.update({
-                        accessKeyId: 'AKIAJANYG2Z6DURTB6XA',
-                        secretAccessKey: '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',
+                        accessKeyId: '',
+                        secretAccessKey: '',
                         region: 'us-west-1'
                     });
 
