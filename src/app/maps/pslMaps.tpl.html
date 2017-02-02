@@ -1,5 +1,5 @@
 <div class="psl-maps">
-    <div id="map" style="height:600px; width: 1000px;">
+    <div id="map">
 
         <script type="text/ng-template" id="myModalContent.html">
             <div class="modal-header">
@@ -9,10 +9,21 @@
                 <div class="row" id="modal-btns">
                     <input type="file" class="upload-btns" name="file" file>
                     <button class="btn btn-primary upload-btns" ng-click="upload(file)">Upload Image</button>
+                    <div class="progress" id="upload-progress" ng-if="showProgress">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ uploadProgress }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ uploadProgress }}%;">
+                            {{ uploadProgress == 0 ? '' : uploadProgress + '%' }}
+                        </div>
+                    </div>
                 </div>
 
-                <img class="thumb" ng-src="{{s3Url}}{{thumb.Key}}"
-                     ng-repeat="thumb in thumbData" ng-click="open($index)">
+                <div class="img-wrap">
+                    <span class="close">&times;</span>
+                    <img class="thumb" ng-src="{{s3Url}}{{thumb.Key}}"
+                         ng-repeat="thumb in thumbData" ng-click="open($index)">
+                </div>
+
+
+
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>

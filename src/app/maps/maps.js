@@ -128,6 +128,43 @@ angular.module('ngBoilerplate.maps', [
 
                 initMap();
 
+                function emptyFolder(folderName,callback){
+                    var params = {
+                        Bucket: 'pasalo92imageupload',
+                        Prefix: folderName + "/"
+                    };
+
+                    var s3 = new AWS.S3();
+
+                    s3.listObjects(params, function (err, data) {
+                        if (err) {
+                            return callback(err);
+                        }
+
+                        if (data.Contents.length === 0) {
+                            return callback();
+                        }
+
+                        params = {Bucket: 'pasalo92imageupload'};
+                        params.Delete = {Objects: []};
+
+                        data.Contents.forEach(function (content) {
+                            params.Delete.Objects.push({Key: content.Key});
+                        });
+
+                        s3.deleteObjects(params, function (err, data) {
+                            if (err) {
+                                return callback(err);
+                            }
+                            if (data.Deleted.length === 1000) {
+                                emptyFolder(folderName, callback);
+                            } else {
+                                callback();
+                            }
+                        });
+                    });
+                }
+
                 function placeOrDelMarker(latLng, map, numClicks) {
 
                     var marker = new google.maps.Marker
@@ -143,6 +180,9 @@ angular.module('ngBoilerplate.maps', [
                         if (conf) {
                             marker.setMap(null);
                             mapsService.setMarkers(latLng, 'del');
+
+                            emptyFolder(marker.markerNum);
+
                         }
 
                     });
@@ -154,29 +194,21 @@ angular.module('ngBoilerplate.maps', [
                             ariaDescribedBy: 'modal-body',
                             templateUrl: 'myModalContent.html',
                             controller: 'modalCtrl',
-                            size: 'lg'
+                            size: 'lg',
+                            resolve: {
+                                markNum: function () {
+                                    return marker.markerNum;
+                                }
+                            }
                         });
                     });
 
-                    // var lat = latLng.lat();
-                    // var lng = latLng.lng();
-
-
-                    // var s3bucket = new AWS.S3();
-                    // s3bucket.createBucket(function() {
-                    //     var params = {Bucket: 'bucket/sub-bucket', Key: 'pasalo92TestBucket', Body: 'Hello!'};
-                    //     s3bucket.putObject(params, function(err, data) {
-                    //         if (err) {
-                    //             console.log("Error uploading data: ", err);
-                    //         }
-                    //     });
-                    // });
                 }
             }
         };
     }])
 
-    .controller('modalCtrl', function modalCtrl($scope, $modal, $modalInstance) {
+    .controller('modalCtrl', function modalCtrl($scope, $modal, $modalInstance, markNum) {
 
         $scope.s3Url = "https://s3-us-west-1.amazonaws.com/pasalo92imageupload/";
         // var deferred = $q.defer();
@@ -184,21 +216,23 @@ angular.module('ngBoilerplate.maps', [
 
         var bucket = new AWS.S3({
             params: {
-                Bucket: 'pasalo92imageupload'
+                Bucket: 'pasalo92imageupload',
+                Prefix:  markNum.toString() + "/"
             }
         });
 
-        bucket.listObjects(function (err, data) {
-            if (err) {
-                console.log(err);
-            } else {
-                //console.log(data);
-                $scope.thumbData = data.Contents;
-                picObjects = data.Contents;
-            }
-        });
+        var callBucket = function () {
+            bucket.listObjects(function (err, data) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    $scope.thumbData = data.Contents;
+                    picObjects = data.Contents;
+                }
+            });
+        };
 
-
+        callBucket();
 
         $scope.open = function(indx){
             
@@ -239,7 +273,7 @@ angular.module('ngBoilerplate.maps', [
                 // Prepend Unique String To Prevent Overwrites
                 var uniqueFileName = uniqueString() + '-' + file.name;
 
-                var params = { Key: uniqueFileName, ContentType: file.type, Body: file, ServerSideEncryption: 'AES256' };
+                var params = { Key: markNum.toString() + "/" + uniqueFileName, ContentType: file.type, Body: file, ServerSideEncryption: 'AES256' };
 
                 bucket.putObject(params, function(err) {
                     if(err) {
@@ -249,9 +283,17 @@ angular.module('ngBoilerplate.maps', [
                     else {
                         // Upload Successfully Finished
                         alert('File Uploaded Successfully');
-
+                        callBucket();
+                        $scope.uploadProgress = 0;
+                        $scope.$digest();
+                        $scope.showProgress = false;
                     }
-                });
+                })
+                    .on('httpUploadProgress',function(progress) {
+                        $scope.showProgress = true;
+                        $scope.uploadProgress = Math.round(progress.loaded / progress.total * 100);
+                        $scope.$digest();
+                    });
             }
             else {
                 // No File Selected
