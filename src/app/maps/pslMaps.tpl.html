@@ -16,10 +16,10 @@
                     </div>
                 </div>
 
-                <div class="img-wrap">
-                    <span class="close">&times;</span>
+                <div class="img-wrap" ng-repeat="thumb in thumbData">
+                    <span class="close" ng-click="deleteImg($index, thumb.Key)">&times;</span>
                     <img class="thumb" ng-src="{{s3Url}}{{thumb.Key}}"
-                         ng-repeat="thumb in thumbData" ng-click="open($index)">
+                          ng-click="open($index)">
                 </div>
 
 

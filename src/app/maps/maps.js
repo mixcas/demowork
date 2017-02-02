@@ -231,6 +231,20 @@ angular.module('ngBoilerplate.maps', [
                 }
             });
         };
+        
+        var deletePic = function (key) {
+
+            var params = { Key: key };
+
+            bucket.deleteObject(params, function(err, data) {
+                if(err) {
+                    console.log(err, err.stack);  // error
+                } else {
+                    alert(key + " has been deleted");
+                }
+            });
+
+        };
 
         callBucket();
 
@@ -245,6 +259,17 @@ angular.module('ngBoilerplate.maps', [
                     $scope.imageData[indx].active = true;
                 }
             });
+        };
+
+        $scope.deleteImg = function(indx, key) {
+
+            var conf = confirm("Are you sure you wish to delete this image?");
+
+            if (conf) {
+                deletePic(key);
+                $scope.thumbData.splice(indx, indx+1);
+            }
+
         };
 
         $scope.ok = function () {
@@ -264,12 +289,6 @@ angular.module('ngBoilerplate.maps', [
         $scope.upload = function (file) {
 
             if(file) {
-                // Perform File Size Check First
-                // var fileSize = Math.round(parseInt($scope.file.size));
-                // if (fileSize > $scope.sizeLimit) {
-                //     toastr.error('Sorry, your attachment is too big. <br/> Maximum '  + $scope.fileSizeLabel() + ' file attachment allowed','File Too Large');
-                //     return false;
-                // }
                 // Prepend Unique String To Prevent Overwrites
                 var uniqueFileName = uniqueString() + '-' + file.name;
 
